@@ -20,7 +20,7 @@ const zombies = [
   {name:"Caminhantes de The Walking Dead",description:"Caminhantes de The Walking Dead: lentos, numerosos e atraídos por ruído. A sobrevivência depende de recursos e abrigo.",weights:{mobility:1,combat:2,medical:1,food:3,communication:1,shelter:3}},
   {name:"Infectados de Left 4 Dead",description:"Infectados de Left 4 Dead: velozes e acompanhados por variantes especiais. Trabalhar com informação e defesa é vital.",weights:{mobility:3,combat:3,medical:2,food:1,communication:3,shelter:1}},
   {name:"Infectados de Invasão Zumbi",description:"Infectados de Invasão Zumbi (Train to Busan): muito rápidos, movem-se em hordas e são atraídos por sons.",weights:{mobility:3,combat:2,medical:1,food:1,communication:2,shelter:2}},
-  {name:"Zumbis de Kingdom",description:"Zumbis de Kingdom: rápidos no escuro e menos ativos sob luz intensa. Planejamento, abrigo e recursos fazem diferença.",weights:{mobility:2,combat:2,medical:2,food:2,communication:1,shelter:3}}
+  {name:"Zumbis de Zumbilândia",description:"Zumbis de Zumbilândia: caóticos, imprevisíveis e atraídos por oportunidades fáceis. Regras de sobrevivência, mobilidade e defesa fazem diferença.",weights:{mobility:3,combat:3,medical:1,food:1,communication:2,shelter:1}}
 ];
 const items = [
   {name:"Mochila de resgate",description:"Mochila de resgate com lanterna e corda.",tags:["mobility","shelter"]},
