@@ -8,4 +8,5 @@
 .player-role { color:var(--muted); font-size:.85rem; margin:7px 0 0; }
 .result-panel { background:#f5e7c6; border-color:#d9a749; }
 .result-panel h2 { color:var(--dark); }
+.run-panel { background:#e9e1f2; border-color:#bca6d5; }
 .zombie-art { background:#182722; border:1px solid #b8c7bb; border-radius:10px; display:block; height:auto; margin-top:14px; max-height:420px; max-width:100%; object-fit:contain; width:100%; }
