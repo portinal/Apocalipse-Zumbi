@@ -82,12 +82,28 @@ function view(room) { return {roomCode:room.code,zombie:room.zombie,players:room
 function send(room) { io.to(room.code).emit("state",view(room)); }
 function session(socket,data) { const room=rooms.get(data?.roomCode),player=socket.data.players?.get(data?.roomCode); return room&&Number.isInteger(player)?{room,player}:null; }
 function onlyPlayer(socket,data,callback) { const found=session(socket,data); if(!found) return socket.emit("action-error","Sua sessão não tem permissão para esta sala."); callback(found.room,found.player); }
+function itemAnalysis(item,zombie) {
+  const strengths=item.tags.map((tag)=>`${tagNames[tag]} (${zombie.weights[tag]||0} ponto${(zombie.weights[tag]||0)===1?"":"s"})`).join(" e ");
+  const bestTag=item.tags.reduce((best,tag)=>(zombie.weights[tag]||0)>(zombie.weights[best]||0)?tag:best,item.tags[0]);
+  return `${item.name} é importante por oferecer ${strengths}; contra ${zombie.name}, sua maior contribuição é ${tagNames[bestTag]}.`;
+}
+function combinations(inventory) {
+  const tags=new Set(inventory.flatMap((item)=>item.tags));
+  const pairs=[];
+  if(tags.has("mobility")&&tags.has("communication")) pairs.push("mobilidade e comunicação permitem escolher rotas e coordenar fugas");
+  if(tags.has("combat")&&tags.has("medical")) pairs.push("defesa e saúde aumentam a chance de sobreviver a confrontos");
+  if(tags.has("shelter")&&tags.has("food")) pairs.push("abrigo e recursos sustentam uma base por mais tempo");
+  if(tags.has("shelter")&&tags.has("communication")) pairs.push("abrigo e comunicação mantêm uma base protegida e informada");
+  if(tags.has("mobility")&&tags.has("food")) pairs.push("mobilidade e recursos permitem fugir sem ficar sem suprimentos");
+  return pairs.length?pairs.join("; "):"os itens ajudam individualmente, mas ainda não formam uma combinação estratégica completa";
+}
 function finish(room) {
   if(!room.players.every((player)=>player.balance===0)) return;
   const points=room.players.map((player)=>player.inventory.reduce((sum,item)=>sum+item.tags.reduce((score,tag)=>score+(room.zombie.weights[tag]||0),0),0));
-  const detail=room.players.map((player)=>player.inventory.map((item)=>item.name+" ("+item.tags.map((tag)=>tagNames[tag]).join(" e ")+")").join(", ")||"nenhum item");
+  const report=room.players.map((player)=>({items:player.inventory.map((item)=>itemAnalysis(item,room.zombie)).join(" ")||"Nenhum item foi adquirido.",synergy:combinations(player.inventory)}));
   const winner=points[0]===points[1]?null:points[0]>points[1]?0:1;
-  room.winner={title:winner===null?"Empate na sobrevivência":`Jogador ${winner+1} venceu`,explanation:winner===null?`Os dois jogadores terminaram com ${points[0]} pontos contra ${room.zombie.name}. Seus recursos ficaram equivalentes: Jogador 1: ${detail[0]}. Jogador 2: ${detail[1]}.`:`Contra ${room.zombie.name}, o Jogador ${winner+1} marcou ${points[winner]} pontos, contra ${points[1-winner]} do outro jogador. A avaliação considera os pontos fortes dos zumbis e a utilidade dos itens: Jogador 1: ${detail[0]}. Jogador 2: ${detail[1]}.`};
+  const conclusion=winner===null?`Empate: os dois marcaram ${points[0]} pontos.`:`O Jogador ${winner+1} venceu com ${points[winner]} pontos contra ${points[1-winner]}.`;
+  room.winner={title:winner===null?"Empate na sobrevivência":`Jogador ${winner+1} venceu`,explanation:`Contra ${room.zombie.name}, ${conclusion} Análise do Jogador 1: ${report[0].items} Em conjunto, ${report[0].synergy}. Análise do Jogador 2: ${report[1].items} Em conjunto, ${report[1].synergy}.`};
   room.message="Os dois saldos chegaram a zero. Confira o resultado da sobrevivência.";
 }
 io.on("connection",(socket)=>{
